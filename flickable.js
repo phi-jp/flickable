@@ -73,12 +73,11 @@
             return ;
           }
         }
+        // 動き始めていなかったら何もしない
+        if (!starting) return;
 
         dx = pointX(e) - sx;
         dy = pointY(e) - sy;
-
-        // 動き始めていなかったら何もしない
-        if (!starting) return;
 
         this.fire('move',{
           event: e,
