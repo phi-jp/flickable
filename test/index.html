@@ -1,0 +1,94 @@
+<!doctype html>
+ 
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    
+    <title>Test | Socialink</title>
+    <meta name="description" content="${description}" />
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jade/1.11.0/jade.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/riot/3.1.0/riot+compiler.js'></script>
+    <link rel='stylesheet', href='https://cdn.rawgit.com/phi-jp/meltline/v0.1.5/meltline.css'></link>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <script src='../flickable.js'></script>
+    <style>
+    button {
+      padding: 8px 12px;
+      margin: 4px;
+      outline: none;
+      border: none;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    </style>
+  </head>
+  <body>
+    <app></app>
+  </body>
+</html>
+
+<script type="riot/tag" template='jade'>
+app
+  h1.mb20 Test
+  div.f.fm.p20
+    div.rect.s300.bg-red.mr10.cursor-pointer.f.fh.fs30.bold.rounded-8.box-shadow(ref='red')
+      div.s10per click&drag
+
+  div sx: {sx}
+  div sy: {sy}
+  div dx: {dx}
+  div dy: {dy}
+
+  style.
+    .rect {
+      user-select: none; /* CSS3 */
+      -moz-user-select: none; /* Firefox */
+      -webkit-user-select: none; /* Safari、Chromeなど */
+      -ms-user-select: none; /* IE10かららしい */
+    }
+
+  script.
+    var self = this;
+    this.on('mount', function() {
+
+      // 初期化
+      var flickable = window.flickable(self.refs.red, 'any');
+
+      // 
+      flickable.on('start', function(e) {
+        self.sx = e.sx;
+        self.sy = e.sy;
+        self.update();
+      });
+
+      flickable.on('move', function(e) {
+        self.sx = e.sx;
+        self.sy = e.sy;
+        self.dx = e.dx;
+        self.dy = e.dy;
+        
+        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
+        self.update();
+      });
+
+      flickable.on('end', function(e) {
+
+      });
+      
+    });
+
+
+
+  
+</script>
+
+<script>
+riot.mount('app');
+</script>
