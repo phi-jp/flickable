@@ -154,7 +154,7 @@
 
   exports.flickable = function() {
     return new Flickable(arguments);
-  }
+  };
 
 
 })(window);
