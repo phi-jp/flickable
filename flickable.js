@@ -19,13 +19,7 @@
   };
 
 
-  //
-  // var flick = flickable(element, direction);
-  // flickable.on('start', func)
-  // flickable.on('move', func)
-  // flickable.on('end', func)
-  //
-  
+  // 本体
   Flickable.prototype = {
     _listener: [],
     init: function(args) {
@@ -121,7 +115,7 @@
           }
         }, true);
       }
-      
+
       elm.addEventListener('mouseleave', function() {
         starting = false;
       });
