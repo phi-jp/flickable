@@ -16,14 +16,15 @@
   };
 
   var pointY = function(e) {
-    return e.clientY || e.touches[0].clientY;
+    return e.clientY || e.clientY === 0 || e.touches[0].clientY;
   };
 
   // 本体
   Flickable.prototype = {
-    _listener: [],
+
     init: function(args) {
 
+      this._listener = [];
       // メンバ変数
       this.elm = args[0]; // click した要素
       this.starting; // 動いているかどうか
@@ -42,12 +43,14 @@
       
       // start
       this.elm.addEventListener(EVENT_POINT_START, function(e) {
+        if (this.starting) return ;
+
         this.starting = true;
         this.dx = this.dy = 0;
-
-
+        
         this.sx = pointX(e);
         this.sy = pointY(e);
+
         this.fire('start', {
           event: e,
           currentTarget: e.currentTarget,
@@ -59,7 +62,8 @@
       
       // move
       this.elm.addEventListener(EVENT_POINT_MOVE, function(e) {
-        
+        // 動き始めていなかったら何もしない
+        if (!this.starting) return;
         
         // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
         if (this.direction === 'horizon') {
@@ -76,9 +80,6 @@
             return ;
           }
         }
-        // 動き始めていなかったら何もしない
-        if (!this.starting) return;
-
         this.dx = pointX(e) - this.sx;
         this.dy = pointY(e) - this.sy;
 
@@ -124,9 +125,19 @@
         }.bind(this), true);
       }
 
-      this.elm.addEventListener('mouseleave', function() {
+      this.elm.addEventListener('mouseleave', function(e) {
+        this.fire('end', {
+          event: e,
+          currentTarget: event.currentTarget,
+          sx: this.sx,
+          sy: this.sy,
+          dx: this.dx,
+          dy: this.dy,
+        });
         this.starting = false;
-      });
+
+
+      }.bind(this));
       
       // ドラッグ時の挙動は常にキャンセル
       this.elm.addEventListener('dragstart', function(e) {
