@@ -25,44 +25,44 @@
     init: function(args) {
 
       // メンバ変数
-      var elm = args[0]; // click した要素
-      var starting; // 動いているかどうか
+      this.elm = args[0]; // click した要素
+      this.starting; // 動いているかどうか
 
-      var dx = 0; // x軸座標の移動量
-      var dy = 0; // y軸座標の移動量
-      var sx = 0; // 最初のx地点
-      var sy = 0; // 最初のy地点
+      this.dx = 0; // x軸座標の移動量
+      this.dy = 0; // y軸座標の移動量
+      this.sx = 0; // 最初のx地点
+      this.sy = 0; // 最初のy地点
 
-      var direction = args[1] || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
+      this.direction = args[1] || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
     
       if (!args[0]) {
-      
+        // エラー処理
       }
 
       
       // start
-      elm.addEventListener(EVENT_POINT_START, function(e) {
-        starting = true;
-        dx = dy = 0;
+      this.elm.addEventListener(EVENT_POINT_START, function(e) {
+        this.starting = true;
+        this.dx = this.dy = 0;
 
 
-        sx = pointX(e);
-        sy = pointY(e);
+        this.sx = pointX(e);
+        this.sy = pointY(e);
         this.fire('start', {
           event: e,
           currentTarget: e.currentTarget,
-          sx: sx,
-          sy: sy,
+          sx: this.sx,
+          sy: this.sy,
         });
 
       }.bind(this));
       
       // move
-      elm.addEventListener(EVENT_POINT_MOVE, function(e) {
+      this.elm.addEventListener(EVENT_POINT_MOVE, function(e) {
         
         
         // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
-        if (direction === 'horizon') {
+        if (this.direction === 'horizon') {
           if (Math.abs(dx) < Math.abs(dy)) {
             // dx = dy = 0;
             return ;
@@ -70,30 +70,30 @@
         }
 
         // 縦方向に軸指定してる場合で横に動きすぎたら,イベント発火させない
-        if (direction === 'vertical') {
+        if (this.direction === 'vertical') {
           if (Math.abs(dy) < Math.abs(dx)) {
             // dx = dy = 0;
             return ;
           }
         }
         // 動き始めていなかったら何もしない
-        if (!starting) return;
+        if (!this.starting) return;
 
-        dx = pointX(e) - sx;
-        dy = pointY(e) - sy;
+        this.dx = pointX(e) - this.sx;
+        this.dy = pointY(e) - this.sy;
 
         this.fire('move',{
           event: e,
           currentTarget: e.currentTarget,
-          sx: sx,
-          sy: sy,
-          dx: dx,
-          dy: dy,
+          sx: this.sx,
+          sy: this.sy,
+          dx: this.dx,
+          dy: this.dy,
         });
       }.bind(this));
 
       // END
-      elm.addEventListener(EVENT_POINT_END, function(e) {
+      this.elm.addEventListener(EVENT_POINT_END, function(e) {
         
 
 
@@ -103,31 +103,33 @@
         this.fire('end', {
           event: e,
           currentTarget: event.currentTarget,
-          sx: sx,
-          sy: sy,
-          dx: dx,
-          dy: dy,
+          sx: this.sx,
+          sy: this.sy,
+          dx: this.dx,
+          dy: this.dy,
         });
-        starting = false;
+        
+        this.starting = false;
         
       }.bind(this));
       
 
-      // PCだった場合には、クリックイベントを発火させる
+      // PCだった場合には、クリックイベント
       if (!supportTouch) {
-        elm.addEventListener('click', function(e) {
-          if (dx !== 0 || dy !== 0) {
+        this.elm.addEventListener('click', function(e) {
+          if (this.dx !== 0 || this.dy !== 0) {
             e.preventDefault();
             e.stopPropagation();
           }
         }.bind(this), true);
       }
 
-      elm.addEventListener('mouseleave', function() {
-        starting = false;
+      this.elm.addEventListener('mouseleave', function() {
+        this.starting = false;
       });
-
-      elm.addEventListener('dragstart', function(e) {
+      
+      // ドラッグ時の挙動は常にキャンセル
+      this.elm.addEventListener('dragstart', function(e) {
         e.preventDefault();
       });
 
