@@ -12,6 +12,9 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jade/1.11.0/jade.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/riot/3.1.0/riot+compiler.js'></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+ 
+
     <link rel='stylesheet', href='https://cdn.rawgit.com/phi-jp/meltline/v0.1.5/meltline.css'></link>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -27,20 +30,23 @@
 app
   h1.mb20 Test
   div.f.fm.p20
-    div.rect.s300.bg-red.mr10.cursor-pointer.f.fh.fs30.bold.rounded-8.box-shadow.relative(ref='red')
+    div.non-select.s300.bg-red.mr10.cursor-pointer.f.fh.fs30.bold.rounded-8.box-shadow.relative(ref='red')
       div.s10per click&drag
 
-      a.rect.absolute.s60.bg-green.rounded-4.f.fh.fs12(ref='green', href='https://getit.co.jp')
+      a.non-select.absolute.s60.bg-green.rounded-4.f.fh.fs12(ref='green', href='https://getit.co.jp')
         span child
-        
 
-  div sx: {sx}
-  div sy: {sy}
-  div dx: {dx}
-  div dy: {dy}
+
+
+    div.non-select.s300.h500.bg-red.mr10.cursor-pointer.bold.rounded-8.box-shadow.relative.overflow-scroll.px12.py10(ref='scroll')
+      div.fs36.text-center.mb12 Hello world
+      div.p20.bg-white.rounded-2.fs24
+        div(each='{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}') foo
+
+
 
   style.
-    .rect {
+    .non-select {
       user-select: none; /* CSS3 */
       -moz-user-select: none; /* Firefox */
       -webkit-user-select: none; /* Safari、Chromeなど */
@@ -61,12 +67,7 @@ app
       });
 
       flick1.on('move', function(e) {
-        self.sx = e.sx;
-        self.sy = e.sy;
-        self.dx = e.dx;
-        self.dy = e.dy;
-        
-        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
+        //e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
         self.update();
       });
 
@@ -75,27 +76,42 @@ app
 
 
       var flick2 = window.flickable(self.refs.green, 'any');
-  
       flick2.on('start', function(e) {
         self.sx = e.sx;
         self.sy = e.sy;
         self.update();
-
       });
 
       flick2.on('move', function(e) {
-        self.sx = e.sx;
-        self.sy = e.sy;
-        self.dx = e.dx;
-        self.dy = e.dy;
+        //self.sx = e.sx;
+        //self.sy = e.sy;
+        //self.dx = e.dx;
+        //self.dy = e.dy;
         e.event.stopPropagation();
-        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
+        e.currentTarget.style.transform = 'translate3d(' + e.dx + 'px,' + e.dy + 'px, 0px)';
         self.update();
       });
 
       flick2.on('end', function(e) {
+        e.currentTarget.style.transition = '256ms';
+        e.currentTarget.style.transform = 'translate3d(0px, 0px, 0px)';
+
+        $(e.currentTarget).on('transitionend', function() {
+          this.style.transition = '';
+        });
+
       });
 
+      var flick3 = window.flickable(self.refs.scroll, 'any');
+      flick3.on('start', function(e) {
+
+      });
+      flick3.on('move', function(e) {
+
+      });
+      flick3.on('end', function(e) {
+
+      });
 
       
     });
