@@ -27,8 +27,12 @@
 app
   h1.mb20 Test
   div.f.fm.p20
-    div.rect.s300.bg-red.mr10.cursor-pointer.f.fh.fs30.bold.rounded-8.box-shadow(ref='red')
+    div.rect.s300.bg-red.mr10.cursor-pointer.f.fh.fs30.bold.rounded-8.box-shadow.relative(ref='red')
       div.s10per click&drag
+
+      a.rect.absolute.s60.bg-green.rounded-4.f.fh.fs12(ref='green', href='https://getit.co.jp')
+        span child
+        
 
   div sx: {sx}
   div sy: {sy}
@@ -48,16 +52,15 @@ app
     this.on('mount', function() {
 
       // 初期化
-      var flickable = window.flickable(self.refs.red, 'any');
+      var flick1 = window.flickable(self.refs.red, 'any');
 
-      // 
-      flickable.on('start', function(e) {
+      flick1.on('start', function(e) {
         self.sx = e.sx;
         self.sy = e.sy;
         self.update();
       });
 
-      flickable.on('move', function(e) {
+      flick1.on('move', function(e) {
         self.sx = e.sx;
         self.sy = e.sy;
         self.dx = e.dx;
@@ -67,9 +70,33 @@ app
         self.update();
       });
 
-      flickable.on('end', function(e) {
+      flick1.on('end', function(e) {
+      });
+
+
+      var flick2 = window.flickable(self.refs.green, 'any');
+  
+      flick2.on('start', function(e) {
+        self.sx = e.sx;
+        self.sy = e.sy;
+        self.update();
 
       });
+
+      flick2.on('move', function(e) {
+        self.sx = e.sx;
+        self.sy = e.sy;
+        self.dx = e.dx;
+        self.dy = e.dy;
+        e.event.stopPropagation();
+        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
+        self.update();
+      });
+
+      flick2.on('end', function(e) {
+      });
+
+
       
     });
 
