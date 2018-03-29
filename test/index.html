@@ -31,8 +31,6 @@ app
   h1.mb20 Test
   div.f.fm.p20
     div.non-select.s300.bg-red.mr10.cursor-pointer.f.fh.fs30.bold.rounded-8.box-shadow.relative(ref='red')
-      div.s10per click&drag
-
       a.non-select.absolute.s60.bg-green.rounded-4.f.fh.fs12(ref='green', href='https://getit.co.jp')
         span child
 
@@ -67,31 +65,23 @@ app
       });
 
       flick1.on('move', function(e) {
-        //e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
+        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
         self.update();
       });
 
       flick1.on('end', function(e) {
       });
 
-
+    
       var flick2 = window.flickable(self.refs.green, 'any');
       flick2.on('start', function(e) {
-        self.sx = e.sx;
-        self.sy = e.sy;
-        self.update();
       });
-
       flick2.on('move', function(e) {
-        //self.sx = e.sx;
-        //self.sy = e.sy;
-        //self.dx = e.dx;
-        //self.dy = e.dy;
         e.event.stopPropagation();
+
         e.currentTarget.style.transform = 'translate3d(' + e.dx + 'px,' + e.dy + 'px, 0px)';
         self.update();
       });
-
       flick2.on('end', function(e) {
         e.currentTarget.style.transition = '256ms';
         e.currentTarget.style.transform = 'translate3d(0px, 0px, 0px)';
@@ -107,10 +97,15 @@ app
 
       });
       flick3.on('move', function(e) {
-
+        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
       });
       flick3.on('end', function(e) {
+        e.currentTarget.style.transition = '256ms';
+        e.currentTarget.style.transform = 'translate3d(0px, 0px, 0px)';
 
+        $(e.currentTarget).on('transitionend', function() {
+          this.style.transition = '';
+        });
       });
 
       

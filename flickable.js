@@ -96,11 +96,6 @@
       // END
       this.elm.addEventListener(EVENT_POINT_END, function(e) {
         
-
-
-        // for(item in e.changedTouches) {
-        //   console.log(item.item);
-        // };
         this.fire('end', {
           event: e,
           currentTarget: event.currentTarget,
