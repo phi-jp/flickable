@@ -12,12 +12,21 @@
 
   // global function
   var pointX = function(e) {
-    return e.clientX || e.clientX === 0 || e.touches[0].clientX;
+    return e.clientX;
   };
 
   var pointY = function(e) {
-    return e.clientY || e.clientY === 0 || e.touches[0].clientY;
+    return e.clientY;
   };
+
+  // 最初にタッチした指を検知する
+  var getFirstFinger = function(touches, firstFinger) {
+    if (!firstFinger) return;
+    return Array.prototype.find.call(touches, function(touch) {
+      return touch.identifier === firstFinger.identifier;
+    });
+  };
+  
 
   // 本体
   Flickable.prototype = {
@@ -29,27 +38,36 @@
       this.elm = args[0]; // click した要素
       this.starting; // 動いているかどうか
 
-      this.dx = 0; // x軸座標の移動量
-      this.dy = 0; // y軸座標の移動量
+      this.dx = 0; // x座標の移動量
+      this.dy = 0; // y座標の移動量
       this.sx = 0; // 最初のx地点
       this.sy = 0; // 最初のy地点
-
+      
       this.direction = args[1] || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
-    
+      
+      this.firstFinger = null; // 最初にタッチした指
+
       if (!args[0]) {
         // エラー処理
       }
 
-      
       // start
       this.elm.addEventListener(EVENT_POINT_START, function(e) {
         if (this.starting) return ;
 
         this.starting = true;
         this.dx = this.dy = 0;
-        
-        this.sx = pointX(e);
-        this.sy = pointY(e);
+
+        var point = e;
+
+        // タッチだった場合は最初にタッチした指を取得
+        if (supportTouch) {
+          this.firstFinger = e.touches[0];
+          point = this.firstFinger;
+        }
+      
+        this.sx = pointX(point);
+        this.sy = pointY(point);
 
         this.fire('start', {
           event: e,
@@ -80,8 +98,21 @@
             return ;
           }
         }
-        this.dx = pointX(e) - this.sx;
-        this.dy = pointY(e) - this.sy;
+        
+
+        var point = e;
+
+        // 動かしている指の中に、最初にタッチした指がなかったら何もしない。
+        if (supportTouch) {
+          point = getFirstFinger(e.changedTouches, this.firstFinger);
+          if (!point) {
+            return;
+          }
+        }
+
+        // 動いた移動量
+        this.dx = pointX(point) - this.sx;
+        this.dy = pointY(point) - this.sy;
 
         this.fire('move',{
           event: e,
@@ -96,6 +127,13 @@
       // END
       this.elm.addEventListener(EVENT_POINT_END, function(e) {
         
+
+        // 離された指が最初にタッチされた指だった時だけ end イベント
+        if (supportTouch) {
+          var t = getFirstFinger(e.changedTouches, this.firstFinger);
+          if (!t) return;
+        }
+
         this.fire('end', {
           event: e,
           currentTarget: event.currentTarget,
@@ -108,18 +146,9 @@
         this.starting = false;
         
       }.bind(this));
+
       
-
-      // PCだった場合には、クリックイベント
-      if (!supportTouch) {
-        this.elm.addEventListener('click', function(e) {
-          if (this.dx !== 0 || this.dy !== 0) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }.bind(this), true);
-      }
-
+      // マウスが要素を出た時
       this.elm.addEventListener('mouseleave', function(e) {
         this.fire('end', {
           event: e,
@@ -139,6 +168,15 @@
         e.preventDefault();
       });
 
+      // PCだった場合には、クリックイベント
+      if (!supportTouch) {
+        this.elm.addEventListener('click', function(e) {
+          if (this.dx !== 0 || this.dy !== 0) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }.bind(this), true);
+      }
       return this;
     },
 
