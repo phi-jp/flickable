@@ -188,7 +188,14 @@
       return this;
     },
     one: function(type, func) {
+      var temp = function() {
+        func.apply(this, arguments);
+        this.off(type, temp);
+      }.bind(this);
       
+      this.on(type, temp);
+      
+      return this;
     }, 
     off: function(type, func) {
       if (!this._listener[type]) return;
