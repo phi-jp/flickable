@@ -62,7 +62,7 @@
 
         // タッチだった場合は最初にタッチした指を取得
         if (supportTouch) {
-          this.firstFinger = e.touches[0];
+          this.firstFinger = e.changedTouches[0];
           point = this.firstFinger;
         }
       
