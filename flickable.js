@@ -37,11 +37,12 @@
       // メンバ変数
       this.elm = args[0]; // click した要素
       this.starting; // 動いているかどうか
-
-      this.dx = 0; // x座標の移動量
-      this.dy = 0; // y座標の移動量
-      this.sx = 0; // 最初のx地点
-      this.sy = 0; // 最初のy地点
+      
+      this.x = this.y = 0; // 現在地
+      this.sx = this.sy = 0; // 最初の地点
+      this.dx = this.dy = 0; // 移動量
+      this.prevX = this.prevY = 0; // 前フレームの地点
+      this.movementX = this.movementY = 0; // 前フレームの移動量
       
       this.direction = args[1] || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       
@@ -56,7 +57,9 @@
         if (this.starting) return ;
 
         this.starting = true;
-        this.dx = this.dy = 0;
+
+        this.dx = this.dy = 0; // 移動量0
+        this.movementX = this.movementY = 0; // 前フレームからの移動量も0
 
         var point = e;
 
@@ -65,16 +68,21 @@
           this.firstFinger = e.changedTouches[0];
           point = this.firstFinger;
         }
-      
-        this.sx = pointX(point);
-        this.sy = pointY(point);
+        
+        // 現在地
+        this.x = pointX(point); 
+        this.y = pointX(point);
 
-        this.fire('start', {
-          event: e,
-          currentTarget: e.currentTarget,
-          sx: this.sx,
-          sy: this.sy,
-        });
+        // 現在地をスタート地点として設定
+        this.sx = this.x;
+        this.sy = this.y;
+        
+        // 現在地を前の移動地として設定
+        this.prevX = this.x;
+        this.prevY = this.y;
+
+        // 発火。
+        this.fire('start', this._createEvent(e));
 
       }.bind(this));
       
@@ -110,20 +118,28 @@
           }
         }
 
-        // 動いた移動量
+        // 現在地
+        this.x = pointX(point);
+        this.y = pointY(point);
+        
+        // 移動量
         this.dx = pointX(point) - this.sx;
         this.dy = pointY(point) - this.sy;
 
-        this.fire('move',{
-          event: e,
-          currentTarget: e.currentTarget,
-          sx: this.sx,
-          sy: this.sy,
-          dx: this.dx,
-          dy: this.dy,
-        });
+        // 前フレームからの移動量
+        this.movementX = this.x - this.prevX;
+        this.movementY = this.y - this.prevY;
+        
+        // 発火
+        this.fire('move', this._createEvent(e));
+
+        // 更新
+        this.prevX = this.x;
+        this.prevY = this.y;
+        
       }.bind(this));
 
+    
       // END
       this.elm.addEventListener(EVENT_POINT_END, function(e) {
         
@@ -133,16 +149,12 @@
           var t = getFirstFinger(e.changedTouches, this.firstFinger);
           if (!t) return;
         }
-
-        this.fire('end', {
-          event: e,
-          currentTarget: event.currentTarget,
-          sx: this.sx,
-          sy: this.sy,
-          dx: this.dx,
-          dy: this.dy,
-        });
         
+        debugger;
+        // 発火
+        this.fire('end', this._createEvent(e));
+        
+        // 終了フラグをオンにする。
         this.starting = false;
         
       }.bind(this));
@@ -179,7 +191,21 @@
       }
       return this;
     },
-
+    // イベント作成用
+    _createEvent: function(e) {
+      return {
+        event: e,
+        currentTarget: e.currentTarget,
+        sx: this.sx, // スタート地点
+        sy: this.sy,
+        dx: this.dx, // 移動量
+        dy: this.dy,
+        prevX: this.prevX, // 前フレームの位置
+        prevY: this.prevY,
+        movementX: this.movementX, // 前フレームからの移動量 
+        movementY: this.movementY,
+      }
+    },
     // on, off, one, fire
     on: function(type, func) {
       if (!this._listener[type]) this._listener[type] = [];
