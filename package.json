@@ -1,6 +1,6 @@
 {
   "name": "flickable",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "enable flick library for js",
   "main": "index.js",
   "scripts": {
