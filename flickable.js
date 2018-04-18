@@ -71,7 +71,7 @@
         
         // 現在地
         this.x = pointX(point); 
-        this.y = pointX(point);
+        this.y = pointY(point);
 
         // 現在地をスタート地点として設定
         this.sx = this.x;
