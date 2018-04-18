@@ -149,8 +149,7 @@
           var t = getFirstFinger(e.changedTouches, this.firstFinger);
           if (!t) return;
         }
-        
-        debugger;
+
         // 発火
         this.fire('end', this._createEvent(e));
         
@@ -162,16 +161,9 @@
       
       // マウスが要素を出た時
       this.elm.addEventListener('mouseleave', function(e) {
-        this.fire('end', {
-          event: e,
-          currentTarget: event.currentTarget,
-          sx: this.sx,
-          sy: this.sy,
-          dx: this.dx,
-          dy: this.dy,
-        });
+        // 発火
+        this.fire('end', this._createEvent(e));
         this.starting = false;
-
 
       }.bind(this));
       
@@ -196,6 +188,8 @@
       return {
         event: e,
         currentTarget: e.currentTarget,
+        x: this.x, // 現在地
+        y: this.y,
         sx: this.sx, // スタート地点
         sy: this.sy,
         dx: this.dx, // 移動量
