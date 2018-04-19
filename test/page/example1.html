@@ -1,0 +1,170 @@
+<!doctype html>
+ 
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    
+    <title>Test | Flickable</title>
+    <meta name="description" content="${description}" />
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/less.js/2.5.3/less.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jade/1.11.0/jade.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/riot/3.1.0/riot+compiler.js'></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+ 
+
+    <link rel='stylesheet', href='https://cdn.rawgit.com/phi-jp/meltline/v0.1.5/meltline.css'></link>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <script src='../../flickable.js'></script>
+  </head>
+  <body>
+    <app></app>
+  </body>
+</html>
+
+<script type="riot/tag" template='jade'>
+app
+  div.s-full
+    div.f.flex-column.w100vw.h100vh
+      div.border.border-bottom.text-center.py12
+        div.fs20.bold TEST APP
+      div.w-full.text-center.border-bottom.py12.overflow-scroll.navbar.f.fh
+        div.f.fm
+          div.px20.w100.item(each='{page, i in pages}' class='{active: i === pageIndex}', onclick='{clickNavbar}') {page.label}
+        
+      div.h-full.f.overflow-hidden(ref='slider')
+        div.s-full.flex-fixed.page(each='{page in pages}', data-is="page-{page.name}")
+
+      div.h50.f.fm.flex-around.box-shadow
+        i.material-icons.mx4.text-center(each='{[1,2,3,4,5]}') face
+
+  style.
+    display: block;
+    .non-select {
+      user-select: none; /* CSS3 */
+      -moz-user-select: none; /* Firefox */
+      -webkit-user-select: none; /* Safari、Chromeなど */
+      -ms-user-select: none; /* IE10かららしい */
+    }
+
+    .item {
+      border-bottom: solid 2px transparent;
+    }
+    .item.active {
+      color: green;
+      border-bottom: solid 2px green;
+    }
+
+
+  script.
+    var self = this;
+
+
+
+    this.pageIndex = 0;
+    this.isSliding = false;
+
+    this.pages = [
+      { name: 'hoge', label: 'RED'},
+      { name: 'foo', label: 'BLUE'},
+      { name: 'bar', label: 'WHITE'},
+    ];
+
+    this.on('mount', function() {
+      var slider = this.refs.slider;
+
+      flickable(self.refs.slider, 'horizon').on('start', function() {
+        
+      }).on('move', function(e) {
+        slider.scrollLeft -= e.movementX;
+      }).on('end', function(e) {
+
+        // 移動した方向がが 横だったら 
+        if (e.direction === 'horizon') {
+          self.checkSlide(e);
+        }
+
+        self.update();
+      });
+    });
+
+    this.checkSlide = function(e) {
+      var slider = self.refs.slider;
+      var children = slider.querySelectorAll('.page');
+      
+      var rate = e.movementX / 5;
+      var baseWidth = slider.offsetWidth * 0.5;
+
+      rate += e.dx/baseWidth;
+
+      if ( rate >= 1) {
+        self.pageIndex = Math.max(self.pageIndex - 1, 0);
+      }
+      else if (rate <= 1) {
+        self.pageIndex = Math.min(self.pageIndex + 1, children.length - 1);
+      }
+      self.scrollToCurrent();
+    };
+
+    this.scrollToCurrent = function() {
+      var slider = self.refs.slider;
+      var currentElement = slider.querySelectorAll('.page')[self.pageIndex];
+      this.isSliding = true;
+      $(slider).stop().animate({
+        scrollLeft: currentElement.offsetLeft - slider.offsetLeft,
+      }, 256, function() {
+        this.isSliding = false;
+      })
+    };
+
+    this.clickNavbar = function(e) {
+      self.pageIndex = e.item.i;
+      self.scrollToCurrent();
+    };
+
+
+page-hoge
+  div.f.fh.flex-wrap.p12.mx-auto
+    a.border.s100.rounded-2.f.fh.mx8.mb8.bg-red.box-shadow(each='{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}', href='https://google.com')
+      div.white Google
+  style(type='less').
+    :scope {
+      overflow-y: scroll
+    }
+
+page-foo
+  div.f.fh.flex-wrap.p12.mx-auto
+    div.border.s100.rounded-2.f.fh.mx8.mb8.bg-blue.box-shadow(each='{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}')
+      div.white foo
+  style(type='less').
+    :scope {
+      overflow-y: scroll
+    }
+
+  script.
+    this.root.onscroll = function(e) {
+      e.preventDefault();
+    }
+
+page-bar
+  div.f.fh.flex-wrap.p12.mx-auto
+    div.border.s100.rounded-2.f.fh.mx8.mb8.bg-pink.box-shadow(each='{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]}')
+      div.black bar
+
+  style(type='less').
+    :scope {
+      overflow-y: scroll
+    }
+
+</script>
+
+<script>
+  riot.mount('app');
+  riot.mount('page-hoge');
+  riot.mount('page-foo')
+  riot.mount('page-bar')
+</script>
