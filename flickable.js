@@ -60,6 +60,7 @@
 
         this.dx = this.dy = 0; // 移動量0
         this.movementX = this.movementY = 0; // 前フレームからの移動量も0
+        this.currentDirection = undefined;
 
         var point = e;
 
@@ -93,7 +94,7 @@
         
         // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
         if (this.direction === 'horizon') {
-          if (Math.abs(dx) < Math.abs(dy)) {
+          if (Math.abs(this.dx) < Math.abs(this.dy)) {
             // dx = dy = 0;
             return ;
           }
@@ -101,7 +102,7 @@
 
         // 縦方向に軸指定してる場合で横に動きすぎたら,イベント発火させない
         if (this.direction === 'vertical') {
-          if (Math.abs(dy) < Math.abs(dx)) {
+          if (Math.abs(this.dy) < Math.abs(this.dx)) {
             // dx = dy = 0;
             return ;
           }
@@ -150,6 +151,14 @@
           if (!t) return;
         }
 
+        if (Math.abs(this.dx) < Math.abs(this.dy)) {
+          this.currentDirection = 'vertical';
+        }
+        
+        if (Math.abs(this.dy) < Math.abs(this.dx)) {
+          this.currentDirection = 'horizon';
+        }
+      
         // 発火
         this.fire('end', this._createEvent(e));
         
@@ -198,6 +207,7 @@
         prevY: this.prevY,
         movementX: this.movementX, // 前フレームからの移動量 
         movementY: this.movementY,
+        direction: this.currentDirection,
       }
     },
     // on, off, one, fire
