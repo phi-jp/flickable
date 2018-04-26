@@ -31,12 +31,13 @@
   // 本体
   Flickable.prototype = {
 
-    init: function(args) {
+    init: function(element, options) {
 
       this._listener = [];
       // メンバ変数
-      this.elm = args[0]; // click した要素
+      this.element = element; // click した要素
       this.starting; // 動いているかどうか
+      this.index = 0;
       
       this.x = this.y = 0; // 現在地
       this.sx = this.sy = 0; // 最初の地点
@@ -44,16 +45,12 @@
       this.prevX = this.prevY = 0; // 前フレームの地点
       this.movementX = this.movementY = 0; // 前フレームの移動量
       
-      this.direction = args[1] || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
-      
+      this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
+      this.threshold = options.threshold || 5;
       this.firstFinger = null; // 最初にタッチした指
 
-      if (!args[0]) {
-        // エラー処理
-      }
-
       // start
-      this.elm.addEventListener(EVENT_POINT_START, function(e) {
+      this.element.addEventListener(EVENT_POINT_START, function(e) {
         if (this.starting) return ;
 
         this.starting = true;
@@ -88,7 +85,7 @@
       }.bind(this));
       
       // move
-      this.elm.addEventListener(EVENT_POINT_MOVE, function(e) {
+      this.element.addEventListener(EVENT_POINT_MOVE, function(e) {
         // 動き始めていなかったら何もしない
         if (!this.starting) return;
         
@@ -142,7 +139,7 @@
 
     
       // END
-      this.elm.addEventListener(EVENT_POINT_END, function(e) {
+      this.element.addEventListener(EVENT_POINT_END, function(e) {
         
 
         // 離された指が最初にタッチされた指だった時だけ end イベント
@@ -158,6 +155,22 @@
         if (Math.abs(this.dy) < Math.abs(this.dx)) {
           this.currentDirection = 'horizon';
         }
+
+        // スライド判定
+        var widthThreshold = this.element.clientWidth/this.threshold;
+        var dx = this.sx - this.x;
+        if (widthThreshold < Math.abs(dx)) {
+          this.fire('flick', this._createEvent(e));
+          if (this.x > this.sx) {
+            this.setIndex(this.index-1);
+          }
+          else {
+            this.setIndex(this.index+1);
+          }
+        }
+        else {
+          this.setIndex(this.index);
+        }
       
         // 発火
         this.fire('end', this._createEvent(e));
@@ -169,7 +182,7 @@
 
       
       // マウスが要素を出た時
-      this.elm.addEventListener('mouseleave', function(e) {
+      this.element.addEventListener('mouseleave', function(e) {
         // 発火
         this.fire('end', this._createEvent(e));
         this.starting = false;
@@ -177,13 +190,13 @@
       }.bind(this));
       
       // ドラッグ時の挙動は常にキャンセル
-      this.elm.addEventListener('dragstart', function(e) {
+      this.element.addEventListener('dragstart', function(e) {
         e.preventDefault();
       });
 
       // PCだった場合には、クリックイベント
       if (!supportTouch) {
-        this.elm.addEventListener('click', function(e) {
+        this.element.addEventListener('click', function(e) {
           if (this.dx !== 0 || this.dy !== 0) {
             e.preventDefault();
             e.stopPropagation();
@@ -192,6 +205,16 @@
       }
       return this;
     },
+
+    setIndex: function(index) {
+      var max = this.element.scrollWidth / this.element.clientWidth;
+      index = Math.min(index, max);
+      index = Math.max(index, 0);
+      this.index = index;
+
+      this.fire('index');
+    },
+
     // イベント作成用
     _createEvent: function(e) {
       return {
@@ -210,6 +233,7 @@
         direction: this.currentDirection,
       }
     },
+
     // on, off, one, fire
     on: function(type, func) {
       if (!this._listener[type]) this._listener[type] = [];
@@ -246,8 +270,8 @@
   };
 
 
-  exports.flickable = function() {
-    return new Flickable(arguments);
+  exports.flickable = function(element, options) {
+    return new Flickable(element, options);
   };
 
 

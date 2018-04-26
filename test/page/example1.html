@@ -34,7 +34,7 @@ app
         div.fs20.bold TEST APP
       div.w-full.text-center.border-bottom.py12.overflow-scroll.navbar.f.fh
         div.f.fm
-          div.px20.w100.item(each='{page, i in pages}' class='{active: i === pageIndex}', onclick='{clickNavbar}') {page.label}
+          div.px20.w100.item(each='{page, i in pages}' class='{active: i === f.index}', onclick='{clickNavbar}') {page.label}
         
       div.h-full.f.overflow-hidden(ref='slider')
         div.s-full.flex-fixed.page(each='{page in pages}', data-is="page-{page.name}")
@@ -63,8 +63,7 @@ app
   script.
     var self = this;
 
-
-
+    this.f = {};
     this.pageIndex = 0;
     this.isSliding = false;
 
@@ -76,54 +75,27 @@ app
 
     this.on('mount', function() {
       var slider = this.refs.slider;
-
-      flickable(self.refs.slider, 'horizon').on('start', function() {
+      
+      this.f = flickable(self.refs.slider, {
+        direction: 'horizontal',
+        threshold: 5,
+      }).on('start', function() {
         
       }).on('move', function(e) {
         slider.scrollLeft -= e.movementX;
-      }).on('end', function(e) {
-
-        // 移動した方向がが 横だったら 
-        if (e.direction === 'horizon') {
-          self.checkSlide(e);
-        }
-
+      }).on('index', function(e) {
+        var targetX = this.element.clientWidth * this.index;
+        $(this.element).stop().animate({
+          scrollLeft: targetX,
+        }, 256);
         self.update();
       });
+
+      this.update();
     });
 
-    this.checkSlide = function(e) {
-      var slider = self.refs.slider;
-      var children = slider.querySelectorAll('.page');
-      
-      var rate = e.movementX / 5;
-      var baseWidth = slider.offsetWidth * 0.5;
-
-      rate += e.dx/baseWidth;
-
-      if ( rate >= 1) {
-        self.pageIndex = Math.max(self.pageIndex - 1, 0);
-      }
-      else if (rate <= 1) {
-        self.pageIndex = Math.min(self.pageIndex + 1, children.length - 1);
-      }
-      self.scrollToCurrent();
-    };
-
-    this.scrollToCurrent = function() {
-      var slider = self.refs.slider;
-      var currentElement = slider.querySelectorAll('.page')[self.pageIndex];
-      this.isSliding = true;
-      $(slider).stop().animate({
-        scrollLeft: currentElement.offsetLeft - slider.offsetLeft,
-      }, 256, function() {
-        this.isSliding = false;
-      })
-    };
-
     this.clickNavbar = function(e) {
-      self.pageIndex = e.item.i;
-      self.scrollToCurrent();
+      self.f.setIndex(e.item.i);
     };
 
 
