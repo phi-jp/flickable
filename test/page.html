@@ -62,23 +62,24 @@
 <script>
   window.onload = function() {
     var f = flickable(document.querySelector('#slide'), {
-
+      distance: 30,
     }).on('move', function(e) {
       this.element.scrollLeft -= e.dx;
-    }).on('index', function(e) {
-      var targetX = this.element.clientWidth * this.index;
+    }).on('page', function(e) {
+      console.log(this.page);
+      var targetX = this.element.clientWidth * this.page;
       $(this.element).stop().animate({
         scrollLeft: targetX,
       }, 256);
 
       $('.nav-item').removeClass('bold');
-      $('.nav-item[data-index=' + this.index + ']').addClass('bold');
+      $('.nav-item[data-index=' + this.page + ']').addClass('bold');
     });
 
-    f.setIndex(1);
+    f.page = 1;
 
     $('.nav-item').click(function(e) {
-      f.setIndex(+this.dataset.index);
+      f.page = (+this.dataset.index);
     });
   };
 </script>

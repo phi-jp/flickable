@@ -18,9 +18,9 @@
       this._listener = [];
       // メンバ変数
       this.element = element; // click した要素
-      this.index = 0;
       this.starting = false; // 動いているかどうか
       this.firstFinger = null; // 最初にタッチした指
+      this._page = 0;
       
       this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       this.threshold = options.threshold || 5;
@@ -101,15 +101,6 @@
       this.py = y;
     },
 
-    setIndex: function(index) {
-      var max = this.element.scrollWidth / this.element.clientWidth;
-      index = Math.min(index, max);
-      index = Math.max(index, 0);
-      this.index = index;
-
-      this.fire('index');
-    },
-
     _onstart: function(e) {
       if (this.starting) return ;
       this.starting = true;
@@ -177,14 +168,14 @@
       if (widthThreshold < Math.abs(dx)) {
         this.fire('flick', this._createEvent(e));
         if (this.x > this.sx) {
-          this.setIndex(this.index-1);
+          this.page -= 1;
         }
         else {
-          this.setIndex(this.index+1);
+          this.page += 1;
         }
       }
       else {
-        this.setIndex(this.index);
+        this.page = this.page;
       }
     
       // 発火
@@ -230,6 +221,16 @@
 
     getDistance: function() {
       return Math.abs(this.mx);
+    },
+
+    get page() { return this._page; },
+    set page(page) {
+      var max = this.element.scrollWidth / this.element.clientWidth;
+      page = Math.min(page, max);
+      page = Math.max(page, 0);
+      this._page = page;
+
+      this.fire('page');
     },
 
     // on, off, one, fire
