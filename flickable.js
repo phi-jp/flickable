@@ -36,11 +36,12 @@
       this._listener = [];
       // メンバ変数
       this.element = element; // click した要素
-      this.starting; // 動いているかどうか
       this.index = 0;
       
       this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       this.threshold = options.threshold || 5;
+      
+      this.starting = false; // 動いているかどうか
       this.firstFinger = null; // 最初にタッチした指
 
       this.reset();
@@ -115,7 +116,7 @@
           }
         }
 
-        this.update(e.clientX, e.clientY);
+        this.update(pointX(point), pointY(point));
         
         // 発火
         this.fire('move', this._createEvent(e));
