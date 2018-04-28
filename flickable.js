@@ -128,8 +128,6 @@
     
       // END
       this.element.addEventListener(EVENT_POINT_END, function(e) {
-        
-
         // 離された指が最初にタッチされた指だった時だけ end イベント
         if (supportTouch) {
           var t = getFirstFinger(e.changedTouches, this.firstFinger);
@@ -171,6 +169,8 @@
       
       // マウスが要素を出た時
       this.element.addEventListener('mouseleave', function(e) {
+        if (!this.starting) return ;
+
         // 発火
         this.fire('end', this._createEvent(e));
         this.starting = false;

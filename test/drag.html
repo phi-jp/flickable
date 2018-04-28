@@ -29,11 +29,12 @@
     var x = 0;
     var y = 0;
     var f = flickable(document.querySelector('.box'), {
-
     }).on('move', function(e) {
       x += e.dx;
       y += e.dy;
       this.element.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+    }).on('end', function(e) {
+      console.log('end');
     });
   };
 </script>
