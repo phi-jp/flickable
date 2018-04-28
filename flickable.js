@@ -19,7 +19,7 @@
       // メンバ変数
       this.element = element; // click した要素
       this.starting = false; // 動いているかどうか
-      this.firstFinger = null; // 最初にタッチした指
+      this.currentFinger = null; // 最初にタッチした指
       this._page = 0;
       
       this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
@@ -92,7 +92,7 @@
       this.dx = x - this.px;
       this.dy = y - this.py;
       
-      // 移動量
+      // トータル移動量
       this.mx = x - this.sx;
       this.my = y - this.sy;
 
@@ -129,6 +129,10 @@
       // 動き始めていなかったら何もしない
       if (!this.starting) return;
       
+      // 動かしている指の中に、最初にタッチした指がなかったら何もしない
+      var p = this.toPoint(e);
+      if (!p) return ;
+
       // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
       if (this.direction === 'horizon') {
         if (Math.abs(this.dx) < Math.abs(this.dy)) {
@@ -144,10 +148,6 @@
           return ;
         }
       }
-      
-      // 動かしている指の中に、最初にタッチした指がなかったら何もしない
-      var p = this.toPoint(e);
-      if (!p) return ;
 
       this.update(p.clientX, p.clientY);
       
@@ -158,6 +158,9 @@
     },
 
     _onend: function(e) {
+      // 動き始めていなかったら何もしない
+      if (!this.starting) return;
+
       // 離された指が最初にタッチされた指だった時だけ end イベント
       var p = this.toPoint(e);
       if (!p) return ;
@@ -183,7 +186,7 @@
       
       // 終了フラグをオンにする。
       this.starting = false;
-      this.firstFinger = null;
+      this.currentFinger = null;
     },
 
     // イベント作成用
@@ -204,12 +207,12 @@
       var touches = e.changedTouches;
       // SP
       if (touches) {
-        if (!this.firstFinger) {
-          return this.firstFinger = touches[0];
+        if (!this.currentFinger) {
+          return this.currentFinger = touches[0];
         }
         else {
           return Array.prototype.find.call(touches, function(touch) {
-            return touch.identifier === this.firstFinger.identifier;
+            return touch.identifier === this.currentFinger.identifier;
           }.bind(this));
         }
       }
