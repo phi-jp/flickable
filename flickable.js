@@ -44,12 +44,6 @@
       this.firstFinger = null; // 最初にタッチした指
 
       this.reset();
-      
-      this.x = this.y = 0; // 現在地
-      this.sx = this.sy = 0; // 最初の地点
-      this.dx = this.dy = 0; // 移動量
-      this.prevX = this.prevY = 0; // 前フレームの地点
-      this.movementX = this.movementY = 0; // 前フレームの移動量
 
       // start
       this.element.addEventListener(EVENT_POINT_START, function(e) {
@@ -180,7 +174,6 @@
         // 発火
         this.fire('end', this._createEvent(e));
         this.starting = false;
-
       }.bind(this));
       
       // ドラッグ時の挙動は常にキャンセル
@@ -253,8 +246,6 @@
         dy: this.dy,
         prevX: this.prevX, // 前フレームの位置
         prevY: this.prevY,
-        movementX: this.movementX, // 前フレームからの移動量 
-        movementY: this.movementY,
         direction: this.currentDirection,
       }
     },
