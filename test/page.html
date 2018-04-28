@@ -1,0 +1,78 @@
+<!doctype html>
+ 
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    
+    <title>Page | Flickable</title>
+    <meta name="description" content="${description}" />
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+
+    <link rel='stylesheet', href='https://cdn.rawgit.com/phi-jp/meltline/v0.1.5/meltline.css'></link>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <script src='../flickable.js'></script>
+  </head>
+  <body>
+    <div class='h100vh f flex-column'>
+      <div class='f fh h44 bg-lightgray'>Header</div>
+      <div class='navbar f border-bottom'>
+        <div class='nav-item w-full f fh p16' data-index='0'>HOGE</div>
+        <div class='nav-item w-full f fh p16' data-index='1'>FOO</div>
+        <div class='nav-item w-full f fh p16' data-index='2'>BAR</div>
+      </div>
+      <div class='main s-full overflow-y-scroll'>
+        <div id='slide' class='contents f overflow-hidden'>
+          <div id='HOGE' class='content w-full flex-fixed ovreflow-y-scroll'>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+            <div class='p16 border-bottom'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE </div>
+          </div>
+          <div id='FOO' class='content w-full flex-fixed'>
+            <div class='p16 border-bottom'>FOO FOO FOO FOO FOO FOO FOO FOO FOO </div>
+            <div class='p16 border-bottom'>FOO FOO FOO FOO FOO FOO FOO FOO FOO </div>
+            <div class='p16 border-bottom'>FOO FOO FOO FOO FOO FOO FOO FOO FOO </div>
+          </div>
+          <div id='BAR' class='content w-full flex-fixed'>
+            <div class='p16 border-bottom'>BAR BAR BAR BAR BAR BAR BAR BAR BAR </div>
+          </div>
+        </div>
+      </div>
+      <div class='f fh h50 bg-lightgray'>Footer</div>
+    </div>
+  </body>
+</html>
+
+<script>
+  window.onload = function() {
+    var f = flickable(document.querySelector('#slide'), {
+
+    }).on('move', function(e) {
+      this.element.scrollLeft -= e.movementX;
+    }).on('index', function(e) {
+      var targetX = this.element.clientWidth * this.index;
+      $(this.element).stop().animate({
+        scrollLeft: targetX,
+      }, 256);
+
+      $('.nav-item').removeClass('bold');
+      $('.nav-item[data-index=' + this.index + ']').addClass('bold');
+    });
+
+    f.setIndex(1);
+
+    $('.nav-item').click(function(e) {
+      f.setIndex(+this.dataset.index);
+    });
+  };
+</script>
