@@ -32,7 +32,10 @@
     }).on('move', function(e) {
       x += e.dx;
       y += e.dy;
-      this.element.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+      var mx = x - x%25;
+      var my = y - y%25;
+      this.element.style.transform = 'translate(' + mx + 'px, ' + my + 'px)';
     }).on('end', function(e) {
       console.log('end');
     });
