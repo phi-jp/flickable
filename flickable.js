@@ -50,8 +50,6 @@
         if (this.starting) return ;
         this.starting = true;
 
-        this.currentDirection = undefined;
-
         var point = e;
 
         // タッチだった場合は最初にタッチした指を取得
@@ -132,14 +130,6 @@
         if (supportTouch) {
           var t = getFirstFinger(e.changedTouches, this.firstFinger);
           if (!t) return;
-        }
-
-        if (Math.abs(this.dx) < Math.abs(this.dy)) {
-          this.currentDirection = 'vertical';
-        }
-        
-        if (Math.abs(this.dy) < Math.abs(this.dx)) {
-          this.currentDirection = 'horizon';
         }
 
         // スライド判定
@@ -246,7 +236,6 @@
         dy: this.dy,
         prevX: this.prevX, // 前フレームの位置
         prevY: this.prevY,
-        direction: this.currentDirection,
       }
     },
 
