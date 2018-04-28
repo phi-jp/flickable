@@ -19,108 +19,30 @@
       // メンバ変数
       this.element = element; // click した要素
       this.index = 0;
+      this.starting = false; // 動いているかどうか
+      this.firstFinger = null; // 最初にタッチした指
       
       this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       this.threshold = options.threshold || 5;
-
-      this.starting = false; // 動いているかどうか
-      this.firstFinger = null; // 最初にタッチした指
+      this.distance = options.distance || 5;
 
       this.reset();
 
       // start
       this.element.addEventListener(EVENT_POINT_START, function(e) {
-        if (this.starting) return ;
-        this.starting = true;
-
-        this.reset();
-
-        var p = this.toPoint(e);
-
-        // 現在地
-        this.x = p.clientX;
-        this.y = p.clientY;
-
-        // 現在地をスタート地点として設定
-        this.sx = this.x;
-        this.sy = this.y;
-        
-        // 現在地を前の移動地として設定
-        this.px = this.x;
-        this.py = this.y;
-
-        // 発火。
-        this.fire('start', this._createEvent(e));
-
+        this._onstart(e);
       }.bind(this));
       
       // move
       this.element.addEventListener(EVENT_POINT_MOVE, function(e) {
-        // 動き始めていなかったら何もしない
-        if (!this.starting) return;
-        
-        // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
-        if (this.direction === 'horizon') {
-          if (Math.abs(this.dx) < Math.abs(this.dy)) {
-            // dx = dy = 0;
-            return ;
-          }
-        }
-
-        // 縦方向に軸指定してる場合で横に動きすぎたら,イベント発火させない
-        if (this.direction === 'vertical') {
-          if (Math.abs(this.dy) < Math.abs(this.dx)) {
-            // dx = dy = 0;
-            return ;
-          }
-        }
-        
-        var p = this.toPoint(e);
-
-        // 動かしている指の中に、最初にタッチした指がなかったら何もしない
-        if (!p) return ;
-
-        this.update(p.clientX, p.clientY);
-        
-        // 発火
-        if (this.getDistance() > 5) {
-          this.fire('move', this._createEvent(e));
-        }
-        
+        this._onmove(e);
       }.bind(this));
 
     
       // END
       this.element.addEventListener(EVENT_POINT_END, function(e) {
-        // 離された指が最初にタッチされた指だった時だけ end イベント
-        var p = this.toPoint(e);
-        if (!p) return ;
-
-        // スライド判定
-        var widthThreshold = this.element.clientWidth/this.threshold;
-        var dx = this.sx - this.x;
-        if (widthThreshold < Math.abs(dx)) {
-          this.fire('flick', this._createEvent(e));
-          if (this.x > this.sx) {
-            this.setIndex(this.index-1);
-          }
-          else {
-            this.setIndex(this.index+1);
-          }
-        }
-        else {
-          this.setIndex(this.index);
-        }
-      
-        // 発火
-        this.fire('end', this._createEvent(e));
-        
-        // 終了フラグをオンにする。
-        this.starting = false;
-        this.firstFinger = null;
-        
+        this._onend(e);
       }.bind(this));
-
       
       // マウスが要素を出た時
       this.element.addEventListener('mouseleave', function(e) {
@@ -186,6 +108,91 @@
       this.index = index;
 
       this.fire('index');
+    },
+
+    _onstart: function(e) {
+      if (this.starting) return ;
+      this.starting = true;
+
+      this.reset();
+
+      var p = this.toPoint(e);
+
+      // 現在地
+      this.x = p.clientX;
+      this.y = p.clientY;
+
+      // 現在地をスタート地点として設定
+      this.sx = this.x;
+      this.sy = this.y;
+      
+      // 現在地を前の移動地として設定
+      this.px = this.x;
+      this.py = this.y;
+
+      // 発火。
+      this.fire('start', this._createEvent(e));
+    },
+
+    _onmove: function(e) {
+      // 動き始めていなかったら何もしない
+      if (!this.starting) return;
+      
+      // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
+      if (this.direction === 'horizon') {
+        if (Math.abs(this.dx) < Math.abs(this.dy)) {
+          // dx = dy = 0;
+          return ;
+        }
+      }
+
+      // 縦方向に軸指定してる場合で横に動きすぎたら,イベント発火させない
+      if (this.direction === 'vertical') {
+        if (Math.abs(this.dy) < Math.abs(this.dx)) {
+          // dx = dy = 0;
+          return ;
+        }
+      }
+      
+      // 動かしている指の中に、最初にタッチした指がなかったら何もしない
+      var p = this.toPoint(e);
+      if (!p) return ;
+
+      this.update(p.clientX, p.clientY);
+      
+      // 発火
+      if (this.getDistance() > this.distance) {
+        this.fire('move', this._createEvent(e));
+      }
+    },
+
+    _onend: function(e) {
+      // 離された指が最初にタッチされた指だった時だけ end イベント
+      var p = this.toPoint(e);
+      if (!p) return ;
+
+      // スライド判定
+      var widthThreshold = this.element.clientWidth/this.threshold;
+      var dx = this.sx - this.x;
+      if (widthThreshold < Math.abs(dx)) {
+        this.fire('flick', this._createEvent(e));
+        if (this.x > this.sx) {
+          this.setIndex(this.index-1);
+        }
+        else {
+          this.setIndex(this.index+1);
+        }
+      }
+      else {
+        this.setIndex(this.index);
+      }
+    
+      // 発火
+      this.fire('end', this._createEvent(e));
+      
+      // 終了フラグをオンにする。
+      this.starting = false;
+      this.firstFinger = null;
     },
 
     // イベント作成用
