@@ -39,24 +39,23 @@
       this.starting; // 動いているかどうか
       this.index = 0;
       
+      this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
+      this.threshold = options.threshold || 5;
+      this.firstFinger = null; // 最初にタッチした指
+
+      this.reset();
+      
       this.x = this.y = 0; // 現在地
       this.sx = this.sy = 0; // 最初の地点
       this.dx = this.dy = 0; // 移動量
       this.prevX = this.prevY = 0; // 前フレームの地点
       this.movementX = this.movementY = 0; // 前フレームの移動量
-      
-      this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
-      this.threshold = options.threshold || 5;
-      this.firstFinger = null; // 最初にタッチした指
 
       // start
       this.element.addEventListener(EVENT_POINT_START, function(e) {
         if (this.starting) return ;
-
         this.starting = true;
 
-        this.dx = this.dy = 0; // 移動量0
-        this.movementX = this.movementY = 0; // 前フレームからの移動量も0
         this.currentDirection = undefined;
 
         var point = e;
@@ -66,16 +65,24 @@
           this.firstFinger = e.changedTouches[0];
           point = this.firstFinger;
         }
-        
+
+        this.reset();
+
+        // 現在地をスタート地点として設定
+        this.sx = pointX(point);
+        this.sy = pointY(point);
+                
         // 現在地
         this.x = pointX(point); 
         this.y = pointY(point);
 
-        // 現在地をスタート地点として設定
-        this.sx = this.x;
-        this.sy = this.y;
+        // トータルの移動値
+        this.mx = 0;
+        this.my = 0;
         
         // 現在地を前の移動地として設定
+        this.px = this.x;
+        this.py = this.y;
         this.prevX = this.x;
         this.prevY = this.y;
 
@@ -116,24 +123,11 @@
           }
         }
 
-        // 現在地
-        this.x = pointX(point);
-        this.y = pointY(point);
-        
-        // 移動量
-        this.dx = pointX(point) - this.sx;
-        this.dy = pointY(point) - this.sy;
-
-        // 前フレームからの移動量
-        this.movementX = this.x - this.prevX;
-        this.movementY = this.y - this.prevY;
+        this.update(e.clientX, e.clientY);
         
         // 発火
         this.fire('move', this._createEvent(e));
 
-        // 更新
-        this.prevX = this.x;
-        this.prevY = this.y;
         
       }.bind(this));
 
@@ -204,6 +198,37 @@
         }.bind(this), true);
       }
       return this;
+    },
+
+    reset: function() {
+      // 初期位置
+      this.sx = this.sy = 0;
+      // 現在地
+      this.x = this.y = 0;
+      // 移動値
+      this.dx = this.dy = 0;
+      // トータルの移動値
+      this.mx = this.my = 0;
+      // 前の値
+      this.px = this.py = 0;
+    },
+
+    update: function(x, y) {
+      // 現在地
+      this.x = x;
+      this.y = y;
+
+      // 前フレームからの移動量
+      this.dx = x - this.px;
+      this.dy = y - this.py;
+      
+      // 移動量
+      this.mx = x - this.sx;
+      this.my = y - this.sy;
+
+      // 更新
+      this.px = x;
+      this.py = y;
     },
 
     setIndex: function(index) {
