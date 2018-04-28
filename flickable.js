@@ -10,24 +10,6 @@
   var EVENT_POINT_MOVE  = (supportTouch) ? 'touchmove'  : 'mousemove';
   var EVENT_POINT_END   = (supportTouch) ? 'touchend'   : 'mouseup';
 
-  // global function
-  var pointX = function(e) {
-    return e.clientX;
-  };
-
-  var pointY = function(e) {
-    return e.clientY;
-  };
-
-  // 最初にタッチした指を検知する
-  var getFirstFinger = function(touches, firstFinger) {
-    if (!firstFinger) return;
-    return Array.prototype.find.call(touches, function(touch) {
-      return touch.identifier === firstFinger.identifier;
-    });
-  };
-  
-
   // 本体
   Flickable.prototype = {
 
@@ -53,17 +35,11 @@
 
         this.reset();
 
-        var point = e;
-
-        // タッチだった場合は最初にタッチした指を取得
-        if (supportTouch) {
-          this.firstFinger = e.changedTouches[0];
-          point = this.firstFinger;
-        }
+        var p = this.toPoint(e);
 
         // 現在地
-        this.x = pointX(point); 
-        this.y = pointY(point);
+        this.x = p.clientX;
+        this.y = p.clientY;
 
         // 現在地をスタート地点として設定
         this.sx = this.x;
@@ -99,17 +75,12 @@
           }
         }
         
-        var point = e;
+        var p = this.toPoint(e);
 
-        // 動かしている指の中に、最初にタッチした指がなかったら何もしない。
-        if (supportTouch) {
-          point = getFirstFinger(e.changedTouches, this.firstFinger);
-          if (!point) {
-            return;
-          }
-        }
+        // 動かしている指の中に、最初にタッチした指がなかったら何もしない
+        if (!p) return ;
 
-        this.update(pointX(point), pointY(point));
+        this.update(p.clientX, p.clientY);
         
         // 発火
         if (this.getDistance() > 5) {
@@ -122,10 +93,8 @@
       // END
       this.element.addEventListener(EVENT_POINT_END, function(e) {
         // 離された指が最初にタッチされた指だった時だけ end イベント
-        if (supportTouch) {
-          var t = getFirstFinger(e.changedTouches, this.firstFinger);
-          if (!t) return;
-        }
+        var p = this.toPoint(e);
+        if (!p) return ;
 
         // スライド判定
         var widthThreshold = this.element.clientWidth/this.threshold;
@@ -148,6 +117,7 @@
         
         // 終了フラグをオンにする。
         this.starting = false;
+        this.firstFinger = null;
         
       }.bind(this));
 
@@ -232,6 +202,24 @@
       }
     },
 
+    toPoint: function(e) {
+      var touches = e.changedTouches;
+      // SP
+      if (touches) {
+        if (!this.firstFinger) {
+          return this.firstFinger = touches[0];
+        }
+        else {
+          return Array.prototype.find.call(touches, function(touch) {
+            return touch.identifier === this.firstFinger.identifier;
+          }.bind(this));
+        }
+      }
+      // PC
+      else {
+        return e;
+      }
+    },
 
     getDistance: function() {
       return Math.abs(this.mx);
