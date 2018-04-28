@@ -65,13 +65,18 @@ app
       });
 
       flick1.on('move', function(e) {
-        e.currentTarget.style.transform = 'translate3d(' + 0 + 'px,' + e.dy + 'px, 0px)';
+        this.element.style.transform = 'translate3d(' + 0 + 'px,' + this.my + 'px, 0px)';
         self.update();
       });
 
       flick1.on('end', function(e) {
-      });
+        this.element.style.transition = '256ms';
+        this.element.style.transform = '';
 
+        $(this.element).on('transitionend', function() {
+          this.style.transition = '';
+        });
+      });
     
       var flick2 = window.flickable(self.refs.green, 'any');
       flick2.on('start', function(e) {
@@ -79,18 +84,19 @@ app
       flick2.on('move', function(e) {
         e.event.stopPropagation();
 
-        e.currentTarget.style.transform = 'translate3d(' + e.dx + 'px,' + e.dy + 'px, 0px)';
+        this.element.style.transform = 'translate3d(' + this.mx + 'px,' + this.my + 'px, 0px)';
         self.update();
       });
       flick2.on('end', function(e) {
-        e.currentTarget.style.transition = '256ms';
-        e.currentTarget.style.transform = 'translate3d(0px, 0px, 0px)';
+        this.element.style.transition = '256ms';
+        this.element.style.transform = '';
 
-        $(e.currentTarget).on('transitionend', function() {
+        $(this.element).on('transitionend', function() {
           this.style.transition = '';
         });
-
       });
+
+      return ;
 
       var flick3 = window.flickable(self.refs.scroll, 'any');
       flick3.on('start', function(e) {

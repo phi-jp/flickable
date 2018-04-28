@@ -223,7 +223,7 @@
     },
 
     getDistance: function() {
-      return Math.abs(this.mx);
+      return Math.max( Math.abs(this.mx), Math.abs(this.my) );
     },
 
     get page() { return this._page; },
