@@ -58,7 +58,7 @@
     var f = flickable(document.querySelector('#slide'), {
 
     }).on('move', function(e) {
-      this.element.scrollLeft -= e.movementX;
+      this.element.scrollLeft -= e.dx;
     }).on('index', function(e) {
       var targetX = this.element.clientWidth * this.index;
       $(this.element).stop().animate({

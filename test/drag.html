@@ -1,0 +1,39 @@
+<!doctype html>
+ 
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    
+    <title>Drag | Flickable</title>
+    <meta name="description" content="${description}" />
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+
+    <link rel='stylesheet', href='https://cdn.rawgit.com/phi-jp/meltline/v0.1.5/meltline.css'></link>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <script src='../flickable.js'></script>
+  </head>
+  <body>
+    <div class='h100vh f flex-column'>
+      <div class='box s200 bg-red'></div>
+    </div>
+  </body>
+</html>
+
+<script>
+  window.onload = function() {
+    var x = 0;
+    var y = 0;
+    var f = flickable(document.querySelector('.box'), {
+
+    }).on('move', function(e) {
+      x += e.dx;
+      y += e.dy;
+      this.element.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+    });
+  };
+</script>
