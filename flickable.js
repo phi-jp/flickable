@@ -40,7 +40,7 @@
       
       this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       this.threshold = options.threshold || 5;
-      
+
       this.starting = false; // 動いているかどうか
       this.firstFinger = null; // 最初にタッチした指
 
@@ -51,6 +51,8 @@
         if (this.starting) return ;
         this.starting = true;
 
+        this.reset();
+
         var point = e;
 
         // タッチだった場合は最初にタッチした指を取得
@@ -59,25 +61,17 @@
           point = this.firstFinger;
         }
 
-        this.reset();
-
-        // 現在地をスタート地点として設定
-        this.sx = pointX(point);
-        this.sy = pointY(point);
-                
         // 現在地
         this.x = pointX(point); 
         this.y = pointY(point);
 
-        // トータルの移動値
-        this.mx = 0;
-        this.my = 0;
+        // 現在地をスタート地点として設定
+        this.sx = this.x;
+        this.sy = this.y;
         
         // 現在地を前の移動地として設定
         this.px = this.x;
         this.py = this.y;
-        this.prevX = this.x;
-        this.prevY = this.y;
 
         // 発火。
         this.fire('start', this._createEvent(e));
@@ -105,7 +99,6 @@
           }
         }
         
-
         var point = e;
 
         // 動かしている指の中に、最初にタッチした指がなかったら何もしない。
@@ -119,8 +112,9 @@
         this.update(pointX(point), pointY(point));
         
         // 発火
-        this.fire('move', this._createEvent(e));
-
+        if (this.getDistance() > 5) {
+          this.fire('move', this._createEvent(e));
+        }
         
       }.bind(this));
 
@@ -235,9 +229,12 @@
         sy: this.sy,
         dx: this.dx, // 移動量
         dy: this.dy,
-        prevX: this.prevX, // 前フレームの位置
-        prevY: this.prevY,
       }
+    },
+
+
+    getDistance: function() {
+      return Math.abs(this.mx);
     },
 
     // on, off, one, fire
