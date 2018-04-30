@@ -49,7 +49,7 @@
         if (!this.starting) return ;
 
         // 発火
-        this.fire('end', this._createEvent(e));
+        this.fire('end', this.toEvent(e));
         this.starting = false;
       }.bind(this));
       
@@ -122,7 +122,7 @@
       this.py = this.y;
 
       // 発火。
-      this.fire('start', this._createEvent(e));
+      this.fire('start', this.toEvent(e));
     },
 
     _onmove: function(e) {
@@ -153,7 +153,7 @@
       
       // 発火
       if (this.getDistance() > this.distance) {
-        this.fire('move', this._createEvent(e));
+        this.fire('move', this.toEvent(e));
       }
     },
 
@@ -169,7 +169,7 @@
       var widthThreshold = this.element.clientWidth/this.threshold;
       var dx = this.sx - this.x;
       if (widthThreshold < Math.abs(dx)) {
-        this.fire('flick', this._createEvent(e));
+        this.fire('flick', this.toEvent(e));
         if (this.x > this.sx) {
           this.page -= 1;
         }
@@ -182,25 +182,38 @@
       }
     
       // 発火
-      this.fire('end', this._createEvent(e));
+      this.fire('end', this.toEvent(e));
       
       // 終了フラグをオンにする。
       this.starting = false;
       this.currentFinger = null;
     },
 
-    // イベント作成用
-    _createEvent: function(e) {
+    // イベント化
+    toEvent: function(e) {
       return {
-        event: e,
-        currentTarget: e.currentTarget,
-        x: this.x, // 現在地
+        target: this.element,
+        flickable: flickable,
+
+        x: this.x,
         y: this.y,
-        sx: this.sx, // スタート地点
+        sx: this.sx,
         sy: this.sy,
-        dx: this.dx, // 移動量
+        dx: this.dx,
         dy: this.dy,
-      }
+        mx: this.mx,
+        my: this.my,
+        px: this.px,
+        py: this.py,
+
+        originalEvent: e,
+        preventDefault: function() {
+          return e.preventDefault();
+        },
+        stopPropagation: function() {
+          return e.stopPropagation();
+        }
+      };
     },
 
     toPoint: function(e) {
