@@ -229,7 +229,7 @@
     get page() { return this._page; },
     set page(page) {
       var max = this.element.scrollWidth / this.element.clientWidth;
-      page = Math.min(page, max);
+      page = Math.min(page, max-1);
       page = Math.max(page, 0);
       this._page = page;
 
