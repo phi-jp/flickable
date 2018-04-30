@@ -62,11 +62,12 @@
 <script>
   window.onload = function() {
     var f = flickable(document.querySelector('#slide'), {
-      distance: 30,
+      distance: 10,
+      axis: 'x',
     }).on('move', function(e) {
+      e.preventDefault();
       this.element.scrollLeft -= e.dx;
     }).on('page', function(e) {
-      console.log(this.page);
       var targetX = this.element.clientWidth * this.page;
       $(this.element).stop().animate({
         scrollLeft: targetX,

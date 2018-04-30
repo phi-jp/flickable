@@ -22,9 +22,11 @@
       this.currentFinger = null; // 最初にタッチした指
       this._page = 0;
       
-      this.direction = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
-      this.threshold = options.threshold || 5;
-      this.distance = options.distance || 5;
+      this.direction  = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
+      this.speedThreshold = options.speedThreshold || 10;
+      this.moveThreshold  = options.moveThreshold || 5;
+      this.distance   = options.distance || 5;
+      this.axis       = options.axis;
 
       this.reset();
 
@@ -166,9 +168,7 @@
       if (!p) return ;
 
       // スライド判定
-      var widthThreshold = this.element.clientWidth/this.threshold;
-      var dx = this.sx - this.x;
-      if (widthThreshold < Math.abs(dx)) {
+      if (this.isFlick()) {
         this.fire('flick', this.toEvent(e));
         if (this.x > this.sx) {
           this.page -= 1;
@@ -236,7 +236,32 @@
     },
 
     getDistance: function() {
-      return Math.max( Math.abs(this.mx), Math.abs(this.my) );
+      var amx = Math.abs(this.mx);
+      var amy = Math.abs(this.my);
+      if (!this.axis) {
+        return Math.max( amx, amy );
+      }
+      else if (this.axis === 'x') {
+        return amx > amy ? amx : 0;
+      }
+      else if (this.axis === 'y') {
+        return amy > amx ? amy : 0;
+        return Math.abs(this.my);
+      }
+    },
+
+    isFlick: function() {
+      // 早くフリックした場合, 移動値に関係なくフリックとみなす
+      if (this.getDistance() > 0 && Math.abs(this.dx) > this.speedThreshold) {
+        return true;
+      }
+
+      // width / moveThreshold 分動いてたらフリックとみなす
+      var widthThreshold = this.element.clientWidth/this.moveThreshold;
+      if (widthThreshold < Math.abs(this.mx)) {
+        return true;
+      }
+      return false;
     },
 
     get page() { return this._page; },
