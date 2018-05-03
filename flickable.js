@@ -20,6 +20,7 @@
       this.element = element; // click した要素
       this.starting = false; // 動いているかどうか
       this.currentFinger = null; // 最初にタッチした指
+      this.lock = false;
       this._page = 0;
       
       this.direction  = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
@@ -130,28 +131,22 @@
     _onmove: function(e) {
       // 動き始めていなかったら何もしない
       if (!this.starting) return;
+
+      // ロックがかかっていたら何もしない
+      if (this.lock) return ;
       
       // 動かしている指の中に、最初にタッチした指がなかったら何もしない
       var p = this.toPoint(e);
       if (!p) return ;
 
-      // 横方向に軸指定してる場合で縦に動きすぎたら,イベント発火させない;
-      if (this.direction === 'horizon') {
-        if (Math.abs(this.dx) < Math.abs(this.dy)) {
-          // dx = dy = 0;
-          return ;
-        }
-      }
-
-      // 縦方向に軸指定してる場合で横に動きすぎたら,イベント発火させない
-      if (this.direction === 'vertical') {
-        if (Math.abs(this.dy) < Math.abs(this.dx)) {
-          // dx = dy = 0;
-          return ;
-        }
-      }
-
       this.update(p.clientX, p.clientY);
+
+      if (this.axis === 'x') {
+        if (Math.abs(this.mx) < Math.abs(this.my)) {
+          this.lock = true;
+          return ;
+        }
+      }
       
       // 発火
       if (this.getDistance() > this.distance) {
@@ -168,7 +163,7 @@
       if (!p) return ;
 
       // スライド判定
-      if (this.isFlick()) {
+      if (!this.lock && this.isFlick()) {
         this.fire('flick', this.toEvent(e));
         if (this.x > this.sx) {
           this.page -= 1;
@@ -187,6 +182,7 @@
       // 終了フラグをオンにする。
       this.starting = false;
       this.currentFinger = null;
+      this.lock = false;
     },
 
     // イベント化
@@ -252,7 +248,7 @@
 
     isFlick: function() {
       // 早くフリックした場合, 移動値に関係なくフリックとみなす
-      if (this.getDistance() > 0 && Math.abs(this.dx) > this.speedThreshold) {
+      if (Math.abs(this.dx) > this.speedThreshold) {
         return true;
       }
 
