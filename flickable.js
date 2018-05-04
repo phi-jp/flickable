@@ -14,7 +14,7 @@
   Flickable.prototype = {
 
     init: function(element, options) {
-
+      options = options || {};
       this._listener = [];
       // メンバ変数
       this.element = element; // click した要素
@@ -27,7 +27,7 @@
       this.speedThreshold = options.speedThreshold || 10;
       this.moveThreshold  = options.moveThreshold || 5;
       this.distance   = options.distance || 5;
-      this.axis       = options.axis;
+      this.axis       = options.axis || '';
 
       this.reset();
 
@@ -147,6 +147,12 @@
           return ;
         }
       }
+      else if (this.axis === 'y') {
+        if (Math.abs(this.my) < Math.abs(this.mx)) {
+          this.lock = true;
+          return ;
+        }
+      }
       
       // 発火
       if (this.getDistance() > this.distance) {
@@ -165,11 +171,21 @@
       // スライド判定
       if (!this.lock && this.isFlick()) {
         this.fire('flick', this.toEvent(e));
-        if (this.x > this.sx) {
-          this.page -= 1;
+        if (this.axis === 'x') {
+          if (this.x > this.sx) {
+            this.page -= 1;
+          }
+          else {
+            this.page += 1;
+          }
         }
-        else {
-          this.page += 1;
+        else if (this.axis === 'y') {
+          if (this.y > this.sy) {
+            this.page -= 1;
+          }
+          else {
+            this.page += 1;
+          }
         }
       }
       else {
@@ -246,15 +262,32 @@
       }
     },
 
+    getMaxPage: function() {
+      var max = 0;
+      if (this.axis === 'x') {
+        max = this.element.scrollWidth / this.element.clientWidth;
+      }
+      else if (this.axis === 'y') {
+        max = this.element.scrollHeight / (this.element.clientHeight-1);
+      }
+      else {
+        max = this.element.scrollWidth / this.element.clientWidth;
+      }
+      return Math.floor(max)-1;
+    },
+
     isFlick: function() {
+      var d = (this.axis === 'y') ? this.dy : this.dx;
+      var m = (this.axis === 'y') ? this.my : this.mx;
+      var w = (this.axis === 'y') ? this.element.clientHeight : this.element.clientWidth;
       // 早くフリックした場合, 移動値に関係なくフリックとみなす
-      if (Math.abs(this.dx) > this.speedThreshold) {
+      if (Math.abs(d) > this.speedThreshold) {
         return true;
       }
 
       // width / moveThreshold 分動いてたらフリックとみなす
-      var widthThreshold = this.element.clientWidth/this.moveThreshold;
-      if (widthThreshold < Math.abs(this.mx)) {
+      var widthThreshold = w/this.moveThreshold;
+      if (widthThreshold < Math.abs(m)) {
         return true;
       }
       return false;
@@ -262,8 +295,8 @@
 
     get page() { return this._page; },
     set page(page) {
-      var max = this.element.scrollWidth / this.element.clientWidth;
-      page = Math.min(page, max-1);
+      var max = this.getMaxPage();
+      page = Math.min(page, max);
       page = Math.max(page, 0);
       this._page = page;
 
