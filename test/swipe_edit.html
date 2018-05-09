@@ -22,9 +22,21 @@
       <div class='f fh h44 flex-fixed bg-lightgray'>Header</div>
       <div class='main s-full overflow-hidden'>
         <div class='s-full content w-full'>
-          <div id='item', class='border-bottom f overflow-hidden'>
+          <div class='item border-bottom f overflow-hidden'>
             <div class='w-full flex-fixed p16'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE</div>
-            <div class='bg-red px26 f fh'>
+            <div class='btn-del bg-red px26 f fh'>
+              <i class='material-icons menu white'>delete</i>
+            </div>
+          </div>
+          <div class='item border-bottom f overflow-hidden'>
+            <div class='w-full flex-fixed p16'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE</div>
+            <div class='btn-del bg-red px26 f fh'>
+              <i class='material-icons menu white'>delete</i>
+            </div>
+          </div>
+          <div class='item border-bottom f overflow-hidden'>
+            <div class='w-full flex-fixed p16'>HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE HOGE</div>
+            <div class='btn-del bg-red px26 f fh'>
               <i class='material-icons menu white'>delete</i>
             </div>
           </div>
@@ -37,17 +49,30 @@
 
 <script>
   window.onload = function() {
-    var f = flickable(document.querySelector('#item'), {
-      axis:'x',
-    }).on('move', function(e) {
-      e.preventDefault();
-      this.element.scrollLeft -= e.dx;
-    }).on('page', function(e) {
-      var menu = $(this.element).find('.menu')[0];
-      var targetX = menu.clientWidth * this.page;
-      $(this.element).stop().animate({
-        scrollLeft: targetX,
-      }, 256);
+    Array.from(document.querySelectorAll('.item')).forEach(function(elm) {
+      var f = flickable(elm, {
+        axis:'x',
+        maxPage: 1,
+      }).on('move', function(e) {
+        e.preventDefault();
+        this.element.scrollLeft -= e.dx;
+      }).on('page', function(e) {
+        var menu = $(this.element).find('.menu')[0];
+        var targetX = 76 * this.page;
+        $(this.element).stop().animate({
+          scrollLeft: targetX,
+        }, 256);
+      });
+
+      elm.querySelector('.btn-del').onclick = function() {
+        if (window.confirm('削除しますか？')) {
+          $(elm).animate({
+            height: 0
+          }, 200, function() {
+            elm.parentNode.removeChild(elm);
+          });
+        }
+      }
     });
   };
 </script>

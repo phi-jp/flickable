@@ -23,11 +23,12 @@
       this.lock = false;
       this._page = 0;
       
-      this.direction  = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
+      this.direction      = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       this.speedThreshold = options.speedThreshold || 10;
       this.moveThreshold  = options.moveThreshold || 5;
-      this.distance   = options.distance || 5;
-      this.axis       = options.axis || '';
+      this.distance       = options.distance || 5;
+      this.axis           = options.axis || '';
+      this.maxPage        = options.maxPage;
 
       this.reset();
 
@@ -264,7 +265,10 @@
 
     getMaxPage: function() {
       var max = 0;
-      if (this.axis === 'x') {
+      if (this.maxPage) {
+        return this.maxPage;
+      }
+      else if (this.axis === 'x') {
         max = this.element.scrollWidth / this.element.clientWidth;
       }
       else if (this.axis === 'y') {
