@@ -23,7 +23,6 @@
       this.lock = false;
       this._page = 0;
       
-      this.direction      = options.direction || 'any'; // どっち方向にフリックするか('vertical', 'horizontal', 'any')
       this.speedThreshold = options.speedThreshold || 10;
       this.moveThreshold  = options.moveThreshold || 5;
       this.distance       = options.distance || 5;
