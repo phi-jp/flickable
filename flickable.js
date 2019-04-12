@@ -24,7 +24,7 @@
       this._page = 0;
       
       this.speedThreshold = options.speedThreshold || 10;
-      this.moveThreshold  = options.moveThreshold || 5;
+      this.moveThresholdRate = options.moveThresholdRate || 0.5;
       this.distance       = options.distance || 5;
       this.axis           = options.axis || '';
       this.maxPage        = options.maxPage;
@@ -293,9 +293,8 @@
         return true;
       }
 
-      // width / moveThreshold 分動いてたらフリックとみなす
-      var widthThreshold = w/this.moveThreshold;
-      if (widthThreshold < Math.abs(m)) {
+      var moveThreshold = w * this.moveThresholdRate;
+      if (moveThreshold < Math.abs(m)) {
         return true;
       }
       return false;
