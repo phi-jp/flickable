@@ -108,6 +108,7 @@
     _onstart: function(e) {
       if (this.starting) return ;
       this.starting = true;
+      this.firstMove = true;
 
       this.reset();
 
@@ -141,23 +142,25 @@
       if (!p) return ;
 
       this.update(p.clientX, p.clientY);
-
-      if (this.axis === 'x') {
-        if (Math.abs(this.mx) < Math.abs(this.my)) {
-          this.lock = true;
-          return ;
+      if (this.firstMove) {
+        if (this.axis === 'x') {
+          if (Math.abs(this.mx) < Math.abs(this.my)) {
+            this.lock = true;
+            return;
+          }
         }
-      }
-      else if (this.axis === 'y') {
-        if (Math.abs(this.my) < Math.abs(this.mx)) {
-          this.lock = true;
-          return ;
+        else if (this.axis === 'y') {
+          if (Math.abs(this.my) < Math.abs(this.mx)) {
+            this.lock = true;
+            return;
+          }
         }
       }
       
       // 発火
       if (this.getDistance() > this.distance) {
         this.fire('move', this.toEvent(e));
+        this.firstMove = false;
       }
     },
 
