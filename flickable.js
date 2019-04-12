@@ -47,14 +47,16 @@
       this.element.addEventListener(EVENT_POINT_END, function(e) {
         this._onend(e);
       }.bind(this));
+
+      // OS で強制的にタッチが無効にされた場合
+      this.element.addEventListener('touchcancel', function(e) {
+        this._onend(e);
+      }.bind(this));
       
       // マウスが要素を出た時
       this.element.addEventListener('mouseleave', function(e) {
         if (!this.starting) return ;
-
-        // 発火
-        this.fire('end', this.toEvent(e));
-        this.starting = false;
+        this._onend(e);
       }.bind(this));
       
       // ドラッグ時の挙動は常にキャンセル
